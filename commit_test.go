@@ -216,3 +216,48 @@ func TestParse_ErrorCases(t *testing.T) {
 		})
 	}
 }
+
+// TestValidate checks the Validate function with both valid and invalid commit messages.
+func TestValidate(t *testing.T) {
+	t.Run("Valid Commits", func(t *testing.T) {
+		// Reusing the same valid messages from TestParseCommitMessages
+		validCommitMessages := []string{
+			"feat: allow provided config object to extend other configs",
+			"feat(api): allow provided config object to extend other configs",
+			`fix(parser): handle new separator and repeated keys
+
+This commit adds support for the ' #' separator and ensures
+that repeated footer keys like 'Closes' are aggregated.
+
+Closes: #101
+Fixes #102
+close #103`,
+			`chore!: drop support for Node 12
+
+BREAKING-CHANGE: Dropped support for Node 12.
+All consumers must upgrade to Node 14 or higher.`,
+		}
+
+		for i, commitMessage := range validCommitMessages {
+			err := convcommit.Validate(commitMessage)
+			assert.NoError(t, err, "Expected no error for valid commit case %d", i)
+		}
+	})
+
+	t.Run("Invalid Commits", func(t *testing.T) {
+		// Reusing the same invalid messages from TestParse_ErrorCases
+		invalidCommitMessages := map[string]string{
+			"Empty commit":           "",
+			"Whitespace only commit": "   ",
+			"No colon in header":     "feat a new feature",
+			"Random text":            "this is not a commit message",
+		}
+
+		for name, commitMessage := range invalidCommitMessages {
+			t.Run(name, func(t *testing.T) {
+				err := convcommit.Validate(commitMessage)
+				assert.Error(t, err, "Expected an error for invalid case: %s", name)
+			})
+		}
+	})
+}

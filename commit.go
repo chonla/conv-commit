@@ -38,6 +38,11 @@ func init() {
 	}
 }
 
+func Validate(commitMessage string) error {
+	_, err := Parse(commitMessage)
+	return err
+}
+
 func Parse(commitMessage string) (*Commit, error) {
 	parts := strings.SplitN(strings.TrimSpace(commitMessage), "\n", 2)
 	if len(parts) == 0 || parts[0] == "" {
