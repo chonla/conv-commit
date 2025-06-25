@@ -1,0 +1,10 @@
+#!/bin/sh
+
+NEXT_VERSION=$(nextver -e)
+if [ -n "${NEXT_VERSION}" ]; then
+    echo "New version: ${NEXT_VERSION}"
+    git tag "${NEXT_VERSION}"
+    git push --tags
+else
+    echo "No new version detected."
+fi
